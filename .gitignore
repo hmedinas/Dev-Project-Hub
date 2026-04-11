@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Base de datos local de Dev Project Hub
+projects.db
+projects.db-journal
+projects.db-wal

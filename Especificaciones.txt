@@ -1,0 +1,338 @@
+================================================================================
+ESPECIFICACIONES TÉCNICAS — Dev Project Hub v1.0.0
+================================================================================
+
+Este documento describe todas las funcionalidades implementadas en la aplicación
+Dev Project Hub como referencia para futuras modificaciones y mantenimiento.
+
+================================================================================
+1. GESTIÓN DE PROYECTOS
+================================================================================
+
+1.1 Crear proyecto
+-----------------
+- Alta de nuevos proyectos con los siguientes campos:
+  * Nombre (obligatorio)
+  * Empresa/Cliente
+  * Lenguaje de programación (selección desplegable)
+  * Tipo de repositorio (Git/Azure)
+  * Tipo de proyecto (Empresa/Personal/Educativo/Freelance/Capacitación)
+  * URLs opcionales: GitHub, Azure DevOps
+  * Rutas físicas: DEV, TEST, PRO (con selector de carpetas)
+  * Descripciones para cada entorno
+  * Ruta de documentación
+  * Observación general
+
+1.2 Editar proyecto
+------------------
+- Edición de todos los campos de un proyecto existente
+- Mantiene las credenciales asociadas al proyecto
+
+1.3 Eliminar proyecto
+------------------
+- Eliminación con confirmación
+- Elimina en cascada las credenciales asociadas (relación 1:N)
+
+1.4 Buscar proyectos
+-----------------
+- Búsqueda por nombre, empresa o lenguaje
+-过滤 insensitive a mayúsculas/minúsculas
+
+1.5 Tipos de proyectos disponibles
+-----------------------------
+- Empresa: Proyectos de empresa/cliente
+- Personal: Proyectos personales
+- Educativo: Proyectos educativos/académicos
+- Freelance: Proyectos freelance
+- Capacitación: Proyectos de formación
+
+================================================================================
+2. GESTIÓN DE CREDENCIALES
+================================================================================
+
+2.1 Crear credencial
+-------------------
+- Alta de credenciales asociadas a un proyecto
+- Campos:
+  * Tipo de usuario (Administrador, SuperAdministrador, Cliente, Usuario Normal,
+    Solo Lectura, Desarrollador, Soporte)
+  * Usuario (obligatorio)
+  * Contraseña (con visibilidad basculable)
+  * Notas (opcional)
+
+2.2 Editar credencial
+------------------
+- Inline editing sin cerrar el formulario
+- Modificación de todos los campos
+
+2.3 Eliminar credencial
+------------------
+- Confirmación antes de eliminar
+- Eliminación individual
+
+2.4 Mostrar/ocultar contraseña
+-------------------------
+- Toggle de visibilidad por credencial
+- Por defecto oculta (••••••••)
+
+2.5 Relación 1:N
+-----------------
+- Un proyecto puede tener múltiples credenciales
+- Las credenciales se eliminan en cascada con el proyecto
+
+================================================================================
+3. VISUALIZACIÓN DE PROYECTOS (PROJECT CARDS)
+================================================================================
+
+3.1 Card colapsable
+----------------
+- Por defecto muestra solo la cabecera (nombre, empresa, tipo)
+- Expande al hacer click para ver detalles
+
+3.2 Estados de ENV
+----------------
+- Cada proyecto muestra tres entornos: DEV, TEST, PRO
+- Por cada entorno: ruta física, fecha de modificación, tamaño
+
+3.3 Información mostrada
+--------------------
+- Icono según lenguaje
+- Nombre del proyecto
+- Empresa/cliente
+- Tipo de proyecto (con icono según categoría)
+- Tipo de repositorio
+- Lenguaje de programación
+
+3.4 Botones de acción
+------------------
+- Abrir en explorador
+- Abrir README.md (自动 búsqueda)
+- Abrir en VS Code
+- Abrir en PyCharm (si disponible)
+- Abrir en Visual Studio (si disponible)
+- Botones de URL (GitHub, Azure)
+- Botón Docs (si hay ruta_docs)
+- Botón Credenciales
+- Editar / Eliminar
+
+3.5 Búsqueda automática de README
+--------------------------
+- Busca README.md en la raíz de cada entorno
+- Case-insensitive
+- Solo nivel raíz (no recursivo)
+- Botón deshabilitado si no existe
+
+3.6 Fecha de modificación
+------------------
+- Formato: DD/MM/YYYY HH:MM
+- Estados: "Sin ruta", "Ruta no encontrada", "Sin permiso", "Error"
+
+3.7 Tamaño de carpeta
+------------------
+- Formato: X.X MB o X.XX GB
+- Calculado recursivamente con os.scandir
+
+================================================================================
+4. LANZADOR DE IDEs
+================================================================================
+
+4.1 Mapeo lenguaje → IDE
+-----------------------
+Python       → PyCharm, VS Code
+Nuxt/Vue/React → VS Code
+CSharp      → Visual Studio, VS Code
+Bat/Shell   → VS Code
+
+4.2 Detección automática de IDE
+-------------------------
+- PyCharm: comando "charm" (macOS), rutas conocidas (Windows)
+- VS Code: comando "code" en PATH
+- Visual Studio: devenv.exe, vswhere.exe
+
+4.3 Cross-platform
+---------------
+- Windows: explorer, cmd /c start
+- macOS: open
+- Linux: xdg-open
+
+4.4 Rutas de Visual Studio soportadas
+-----------------------------
+- VS 2026 Preview/Community/Professional/Enterprise
+- VS 2022 Community/Professional/Enterprise
+- VS 2019 Community/Professional (fallback)
+
+================================================================================
+5. ESCÁNER DE ARCHIVOS
+================================================================================
+
+5.1 get_last_modified()
+--------------------
+- Obtiene fecha de última modificación
+- Usa os.stat().st_mtime
+- Formato: DD/MM/YYYY HH:MM
+
+5.2 get_folder_size_mb()
+-------------------
+- Tamaño total recursivo
+- Usa os.scandir para rendimiento
+- Formato: X.X MB o X.XX GB
+
+5.3 path_exists()
+---------------
+- Verifica existencia de ruta
+- Maneja None/vacío
+
+5.4 find_readme()
+--------------
+- Busca README.md en directorio
+- Case-insensitive
+- Solo nivel raíz
+
+================================================================================
+6. BASE DE DATOS
+================================================================================
+
+6.1 SQLite
+----------
+- Archivo: projects.db
+- Ubicación: mismo directorio que ejecutable
+
+6.2 Modelos
+-----------
+- Proyecto: tabla principal
+- Credencial: credenciales (FK → Proyecto)
+
+6.3 Migraciones ligeras
+------------------
+-Agrega columnas si no existen
+- Solo ADD COLUMN (no DROP/modify)
+
+6.4 Campos Proyecto
+----------------
+id          INTEGER PRIMARY KEY
+nombre      VARCHAR(200) NOT NULL
+empresa     VARCHAR(200) DEFAULT ""
+lenguaje     VARCHAR(50) DEFAULT "Python"
+tipo_repo    VARCHAR(20) DEFAULT "Git"
+tipo_proyecto VARCHAR(50) DEFAULT "Empresa"
+url_github   VARCHAR(500)
+url_azure   VARCHAR(500)
+ruta_dev    VARCHAR(1000)
+ruta_test   VARCHAR(1000)
+ruta_pro    VARCHAR(1000)
+ruta_docs   VARCHAR(1000)
+desc_dev    VARCHAR(500)
+desc_test   VARCHAR(500)
+desc_pro   VARCHAR(500)
+observacion VARCHAR(2000)
+
+6.5 Campos Credencial
+--------------------
+id          INTEGER PRIMARY KEY
+proyecto_id INTEGER FK → proyectos.id
+tipo_usuario VARCHAR(100) DEFAULT "Usuario Normal"
+usuario     VARCHAR(200) NOT NULL
+password    VARCHAR(500) NOT NULL
+notas       VARCHAR(1000)
+
+================================================================================
+7. UI / FLET
+================================================================================
+
+7.1 Tema
+--------
+- Modo oscuro (ThemeMode.DARK)
+- Colores: Catppuccin Mocha
+
+7.2 Colores principales
+------------------
+Background  #181825
+Surface    #1E1E2E
+Overlay    #313244
+Text       #CDD6F4
+Muted      #6C7086
+Accent     #2196F3
+Error      #F38BA8
+Success    #A6E3A1
+
+7.3 Window
+----------
+- Size: 1200x800
+- Min size: 1000x700
+
+7.4 AppBar
+---------
+- IconoHub + título
+- Versión
+- Botón Acerca de
+
+7.5 Dialogs
+-----------
+- page.open(dlg): abre diálogo
+- page.close(dlg): cierra diálogo específico
+- page.run_thread(fn): ejecuta en hilo seguro
+
+7.6 FilePicker
+------------
+- Selector de carpetas nativo
+- on_result callback
+
+================================================================================
+8. ABOUT DIALOG
+================================================================================
+
+8.1 Información mostrada
+--------------------
+- Nombre y versión
+- Descripción
+- Autor
+- Año
+- Stack tecnológico
+- Licencia
+
+8.2 Tecnologías (chips)
+---------------------
+- Python 3
+- Flet 0.25
+- SQLite
+- SQLAlchemy
+- Windows / macOS
+
+================================================================================
+9. PROBLEMAS CONOCIDOS Y SOLUCIONES
+================================================================================
+
+9.1 Flet 0.25.2 deadlock
+---------------------------
+Problema: page.update() no es reentrant — llamar desde dentro de un event handler
+         causa deadlocks.
+
+Solución:
+- Usar page.open(dlg) / page.close(dlg) para dialogs
+- Usar page.run_thread(fn) para post-acción refresh
+
+9.2 SQLAlchemy type-checker errors
+---------------------------
+Problema: LSP muestra falsos positivos al asignar Column types a Flet TextField/Dropdown.
+
+Solución: El código funciona correctamente en runtime. Ignorar los errores de tipo del LSP.
+
+9.3 Dialog Slot Conflicts
+----------------------
+Problema: page.show_dialog() usa un solo slot — conflictos al abrir confirmation
+         desde otro diálogo.
+
+Solución: Usar page.open(dlg) que usa lista controls, permite anidar.
+
+================================================================================
+10. AGRADECIMIENTOS
+================================================================================
+
+- Flet — framework UI
+- SQLAlchemy — ORM
+- Catppuccin — paleta de colores
+- Todas las librerías utilizadas
+
+================================================================================
+FIN DEL DOCUMENTO
+================================================================================

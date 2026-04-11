@@ -1,0 +1,17 @@
+# Dev Project Hub - Requirements
+# Generado: 2026-04-10
+# Python >= 3.10 requerido
+
+# ─── Interfaz de Usuario ───────────────────────────────────────────────────────
+flet>=0.21.0              # Framework UI multiplataforma (Windows, macOS, Linux)
+
+# ─── Base de Datos ─────────────────────────────────────────────────────────────
+sqlalchemy>=2.0.0         # ORM para SQLite - gestión de la tabla Proyectos
+# Alternativa ligera (descomentar si prefieres Peewee en lugar de SQLAlchemy):
+# peewee>=3.17.0
+
+# ─── Utilidades estándar (incluidas en Python, sin instalación extra) ───────────
+# os          - Manejo de rutas y sistema de archivos (os.path, os.stat)
+# subprocess  - Lanzamiento de IDEs externos (PyCharm, VS Code, Visual Studio)
+# datetime    - Formateo de fechas de última modificación
+# pathlib     - Rutas cross-platform compatibles con Windows y macOS
