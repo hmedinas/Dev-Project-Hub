@@ -1,11 +1,21 @@
 # Dev Project Hub
 
-Gestor de repositorios y proyectos de desarrollo. Centraliza tus proyectos, rutas físicas, IDEs y credenciales en un único panel de control rápido y visual.
+Dev Project Hub es una aplicación de escritorio de alto rendimiento diseñada para centralizar la gestión de proyectos de desarrollo, rutas físicas, entornos y credenciales en un único panel de control visual. Construida con un enfoque en la productividad del desarrollador, permite la apertura dinámica de IDEs y el monitoreo en tiempo real de los directorios de trabajo.
+
 
 **Versión:** 1.0.0  
 **Stack:** Python 3 · Flet 0.25 · SQLite · SQLAlchemy  
 **Autor:** Hugo Medina S.  
 **Año:** 2026
+
+## ✨ Características Principales
+
+>* Gestión Centralizada: Control total sobre proyectos personales, empresariales, educativos y freelance.
+>* Lanzador de IDEs Inteligente: Apertura automática en VS Code, PyCharm o Visual Studio basada en el lenguaje de programación detectado (Python, Web, C#, etc.).
+>* Monitor de Entornos: Seguimiento de rutas físicas para DEV, TEST y PRO, con cálculo automático de tamaño de carpeta y fecha de última modificación.
+>* Gestión de Credenciales (1:N): Almacenamiento seguro de múltiples usuarios y contraseñas por proyecto, con visibilidad controlada.
+>* Scanner Automático: Búsqueda inteligente de archivos README.md en la raíz de los proyectos para acceso rápido a la documentación.
+
 
 ---
 
