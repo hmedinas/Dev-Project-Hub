@@ -25,9 +25,9 @@ SYSTEM = platform.system()  # "Windows" | "Darwin" | "Linux"
 IDE_VSCODE = "code"
 IDE_PYCHARM_MAC = "charm"
 IDE_PYCHARM_WIN_PATHS = [
-    r"C:\Program Files\JetBrains\PyCharm Community Edition\bin\pycharm64.exe",
+    r"C:\Program Files\JetBrains\PyCharm PyCharm 2026.1\bin\pycharm64.exe",
     r"C:\Program Files\JetBrains\PyCharm Professional Edition\bin\pycharm64.exe",
-    r"C:\Program Files (x86)\JetBrains\PyCharm Community Edition\bin\pycharm64.exe",
+    r"C:\Program Files (x86)\JetBrains\PyCharm Community Edition 2024.3.1.1\bin\pycharm64.exe",
     r"C:\Program Files (x86)\JetBrains\PyCharm Professional Edition\bin\pycharm64.exe",
 ]
 IDE_VSTUDIO_WIN_PATHS = [
