@@ -12,18 +12,12 @@ from logic.launcher import open_in_vscode, open_in_pycharm, open_in_vstudio
 from ui.components import build_project_card, build_empty_state, build_no_results_state
 from ui.project_form import ProjectForm
 from ui.credential_form import CredentialForm
-
-C_BG      = "#181825"
-C_APPBAR  = "#1E1E2E"
-C_ACCENT  = "#2196F3"
-C_TEXT    = "#CDD6F4"
-C_MUTED   = "#6C7086"
-C_SURFACE = "#313244"
-C_ERROR   = "#F38BA8"
-C_SUCCESS = "#A6E3A1"
+from ui.theme import get_theme_colors
 
 
 def build_dashboard(page: ft.Page) -> ft.Column:
+    # Obtener colores actuales del tema
+    colors = get_theme_colors()
 
     cards_list = ft.ListView(
         expand=True,
@@ -33,7 +27,7 @@ def build_dashboard(page: ft.Page) -> ft.Column:
     content_area = ft.Container(content=cards_list, expand=True)
 
     # ── Snackbar ───────────────────────────────────────────────────────────────
-    def show_snack(message: str, color: str = C_SUCCESS) -> None:
+    def show_snack(message: str, color: str = colors["C_SUCCESS"]) -> None:
         page.snack_bar = ft.SnackBar(
             content=ft.Text(message, color="#1E1E2E"),
             bgcolor=color,
@@ -51,17 +45,17 @@ def build_dashboard(page: ft.Page) -> ft.Column:
         }
         fn = dispatch.get(ide)
         if fn is None:
-            show_snack(f"IDE desconocido: {ide}", C_ERROR)
+            show_snack(f"IDE desconocido: {ide}", colors["C_ERROR"])
             return
         ok, msg = fn(ruta)
-        show_snack(msg, C_SUCCESS if ok else C_ERROR)
+        show_snack(msg, colors["C_SUCCESS"] if ok else colors["C_ERROR"])
 
     def on_open_url(url: str) -> None:
         try:
             webbrowser.open(url)
             show_snack(f"Abriendo: {url[:60]}{'...' if len(url) > 60 else ''}")
         except Exception as exc:
-            show_snack(f"No se pudo abrir la URL: {exc}", C_ERROR)
+            show_snack(f"No se pudo abrir la URL: {exc}", colors["C_ERROR"])
 
     # ── Formulario de proyecto ─────────────────────────────────────────────────
     form         = ProjectForm(page, on_save=lambda: refresh(search_field.value or ""))
@@ -77,7 +71,7 @@ def build_dashboard(page: ft.Page) -> ft.Column:
         cred_form.open(proyecto_id=pid, proyecto_nombre=nombre)
 
     # ── Render ─────────────────────────────────────────────────────────────────
-    counter_text = ft.Text("", size=11, color=C_MUTED)
+    counter_text = ft.Text("", size=11, color=colors["C_MUTED"])
 
     def refresh(query: str = "", update: bool = True) -> None:
         proyectos = db.search_projects(query.strip()) if query.strip() else db.get_all_projects()
@@ -110,11 +104,11 @@ def build_dashboard(page: ft.Page) -> ft.Column:
     search_field = ft.TextField(
         hint_text="Buscar por nombre, empresa o lenguaje...",
         prefix_icon=ft.Icons.SEARCH,
-        border_color=C_SURFACE,
-        focused_border_color=C_ACCENT,
-        hint_style=ft.TextStyle(color=C_MUTED, size=13),
-        text_style=ft.TextStyle(color=C_TEXT, size=13),
-        bgcolor=C_SURFACE,
+        border_color=colors["C_SURFACE"],
+        focused_border_color=colors["C_ACCENT"],
+        hint_style=ft.TextStyle(color=colors["C_MUTED"], size=13),
+        text_style=ft.TextStyle(color=colors["C_TEXT"], size=13),
+        bgcolor=colors["C_SURFACE"],
         border_radius=8,
         content_padding=ft.padding.symmetric(horizontal=12, vertical=8),
         dense=True,
@@ -123,7 +117,7 @@ def build_dashboard(page: ft.Page) -> ft.Column:
         suffix=ft.IconButton(
             icon=ft.Icons.CLEAR,
             icon_size=16,
-            icon_color=C_MUTED,
+            icon_color=colors["C_MUTED"],
             tooltip="Limpiar búsqueda",
             on_click=lambda e: _clear_search(),
         ),
@@ -144,7 +138,7 @@ def build_dashboard(page: ft.Page) -> ft.Column:
                 ft.ElevatedButton(
                     text="Nuevo",
                     icon=ft.Icons.ADD,
-                    bgcolor=C_ACCENT,
+                    bgcolor=colors["C_ACCENT"],
                     color="#FFFFFF",
                     style=ft.ButtonStyle(
                         shape=ft.RoundedRectangleBorder(radius=8),
@@ -157,8 +151,8 @@ def build_dashboard(page: ft.Page) -> ft.Column:
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         ),
         padding=ft.padding.symmetric(horizontal=12, vertical=8),
-        bgcolor=C_APPBAR,
-        border=ft.border.only(bottom=ft.border.BorderSide(1, C_SURFACE)),
+        bgcolor=colors["C_APPBAR"],
+        border=ft.border.only(bottom=ft.border.BorderSide(1, colors["C_SURFACE"])),
     )
 
     # Carga inicial sin update() — la página aún no tiene este control

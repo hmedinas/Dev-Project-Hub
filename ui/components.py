@@ -12,17 +12,8 @@ from typing import Callable
 from logic.launcher import get_ide_availability, open_in_explorer
 from logic.scanner import get_last_modified, get_folder_size_mb, path_exists, find_readme
 
-# ─── Colores ───────────────────────────────────────────────────────────────────
-C_CARD      = "#1E1E2E"
-C_CARD_HEAD = "#181825"
-C_ROW_ALT   = "#2A2A3E"
-C_ACCENT    = "#2196F3"
-C_SUCCESS   = "#A6E3A1"
-C_ERROR     = "#F38BA8"
-C_TEXT      = "#CDD6F4"
-C_MUTED     = "#6C7086"
-C_BORDER    = "#313244"
-C_OBS_BG    = "#252535"
+# Importa la función de tema desde el módulo theme
+from ui.theme import get_theme_colors
 
 # ─── Mapas de iconos ───────────────────────────────────────────────────────────
 LANG_ICON = {
@@ -78,6 +69,8 @@ def _route_row(label: str, ruta: str, fecha: str, size_mb: str,
                desc: str, lenguaje: str,
                on_open: Callable, on_explorer: Callable,
                on_open_readme: Callable) -> ft.Container:
+    # Obtener los colores actuales del tema
+    colors = get_theme_colors()
     """
     Fila de un entorno (DEV/TEST/PRO) con:
     - Etiqueta coloreada
@@ -90,14 +83,14 @@ def _route_row(label: str, ruta: str, fecha: str, size_mb: str,
     avail      = get_ide_availability(lenguaje)
     ruta_ok    = path_exists(ruta)
     readme_path = find_readme(ruta) if ruta_ok else None
-    env_color  = {"DEV": "#89B4FA", "TEST": "#FAB387", "PRO": "#A6E3A1"}.get(label, C_TEXT)
+    env_color  = {"FRONT": "#89B4FA", "BACK": "#FAB387", "GLOBAL": "#A6E3A1"}.get(label, colors["C_TEXT"])
 
     if not ruta:
-        fecha_color = C_MUTED
+        fecha_color = colors["C_MUTED"]
     elif any(x in fecha for x in ("no encontrada", "Error", "Sin permiso", "Sin ruta")):
-        fecha_color = C_ERROR
+        fecha_color = colors["C_ERROR"]
     else:
-        fecha_color = C_SUCCESS
+        fecha_color = colors["C_SUCCESS"]
 
     ruta_display = ruta if ruta else "—"
     if len(ruta_display) > 40:
@@ -108,7 +101,7 @@ def _route_row(label: str, ruta: str, fecha: str, size_mb: str,
         enabled = avail[key] and ruta_ok
         return ft.IconButton(
             icon=icon,
-            icon_color=color if enabled else C_MUTED,
+            icon_color=color if enabled else colors["C_MUTED"],
             tooltip=f"Abrir en {tip}" if enabled else f"{tip} (no disponible)",
             icon_size=16,
             disabled=not enabled,
@@ -117,7 +110,7 @@ def _route_row(label: str, ruta: str, fecha: str, size_mb: str,
 
     explorer_btn = ft.IconButton(
         icon=ft.Icons.FOLDER_OPEN,
-        icon_color="#F0A500" if ruta_ok else C_MUTED,
+        icon_color="#F0A500" if ruta_ok else colors["C_MUTED"],
         tooltip="Abrir en explorador" if ruta_ok else "Ruta no disponible",
         icon_size=16,
         disabled=not ruta_ok,
@@ -136,7 +129,7 @@ def _route_row(label: str, ruta: str, fecha: str, size_mb: str,
             ft.Container(
                 content=ft.Text(
                     ruta_display, size=11,
-                    color=C_TEXT if ruta_ok else C_MUTED,
+                    color=colors["C_TEXT"] if ruta_ok else colors["C_MUTED"],
                     font_family="monospace",
                     tooltip=ruta or None,
                     no_wrap=True,
@@ -151,7 +144,7 @@ def _route_row(label: str, ruta: str, fecha: str, size_mb: str,
             ),
             # Tamaño
             ft.Container(
-                content=ft.Text(size_mb, size=10, color=C_MUTED, no_wrap=True),
+                content=ft.Text(size_mb, size=10, color=colors["C_MUTED"], no_wrap=True),
                 width=72,
                 tooltip="Tamaño total de la carpeta",
             ),
@@ -161,7 +154,7 @@ def _route_row(label: str, ruta: str, fecha: str, size_mb: str,
                     explorer_btn,
                     ft.IconButton(
                         icon=ft.Icons.DESCRIPTION_OUTLINED,
-                        icon_color="#F9E2AF" if readme_path else C_MUTED,
+                        icon_color="#F9E2AF" if readme_path else colors["C_MUTED"],
                         tooltip=f"Abrir README.md ({Path(readme_path).name})" if readme_path else "Sin README.md",
                         icon_size=16,
                         disabled=not readme_path,
@@ -184,7 +177,7 @@ def _route_row(label: str, ruta: str, fecha: str, size_mb: str,
             ft.Container(
                 content=ft.Text(
                     f"  {desc}",
-                    size=10, color=C_MUTED, italic=True,
+                    size=10, color=colors["C_MUTED"], italic=True,
                     no_wrap=True, overflow=ft.TextOverflow.ELLIPSIS,
                 ),
                 padding=ft.padding.only(left=38, bottom=2),
@@ -194,7 +187,7 @@ def _route_row(label: str, ruta: str, fecha: str, size_mb: str,
     return ft.Container(
         content=ft.Column(controls=controls, spacing=1),
         padding=ft.padding.symmetric(horizontal=10, vertical=3),
-        bgcolor=C_ROW_ALT if label != "DEV" else None,
+        bgcolor=colors["C_ROW_ALT"] if label != "DEV" else None,
         border_radius=4,
     )
 
@@ -204,12 +197,14 @@ def _route_row(label: str, ruta: str, fecha: str, size_mb: str,
 def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
                        on_open_url: Callable, on_open_ide: Callable,
                        on_credentials: Callable) -> ft.Card:
+    # Obtener los colores actuales del tema
+    colors = get_theme_colors()
     """
     Card colapsable. Por defecto muestra solo la cabecera (modo colapsado).
     Al pulsar la cabecera o el chevron se expande mostrando rutas, tamaños y observación.
     """
-    lang_icon, lang_color = LANG_ICON.get(proyecto.lenguaje, (ft.Icons.FOLDER, C_MUTED))
-    repo_icon, repo_color = REPO_ICON.get(proyecto.tipo_repo, (ft.Icons.HELP_OUTLINE, C_MUTED))
+    lang_icon, lang_color = LANG_ICON.get(proyecto.lenguaje, (ft.Icons.FOLDER, colors["C_MUTED"]))
+    repo_icon, repo_color = REPO_ICON.get(proyecto.tipo_repo, (ft.Icons.HELP_OUTLINE, colors["C_MUTED"]))
 
     # ── Estado de colapso ────────────────────────────────────────────────────
     is_expanded = ft.Ref[bool]()
@@ -223,14 +218,14 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
     def _get_scan():
         if not _scan_cache:
             _scan_cache["fechas"] = {
-                "DEV":  get_last_modified(proyecto.ruta_dev  or ""),
-                "TEST": get_last_modified(proyecto.ruta_test or ""),
-                "PRO":  get_last_modified(proyecto.ruta_pro  or ""),
+                "FRONT":  get_last_modified(getattr(proyecto, "ruta_front", None) or ""),
+                "BACK":   get_last_modified(getattr(proyecto, "ruta_back", None) or ""),
+                "GLOBAL": get_last_modified(getattr(proyecto, "ruta_global", None) or ""),
             }
             _scan_cache["sizes"] = {
-                "DEV":  get_folder_size_mb(proyecto.ruta_dev  or ""),
-                "TEST": get_folder_size_mb(proyecto.ruta_test or ""),
-                "PRO":  get_folder_size_mb(proyecto.ruta_pro  or ""),
+                "FRONT":  get_folder_size_mb(getattr(proyecto, "ruta_front", None) or ""),
+                "BACK":   get_folder_size_mb(getattr(proyecto, "ruta_back", None) or ""),
+                "GLOBAL": get_folder_size_mb(getattr(proyecto, "ruta_global", None) or ""),
             }
         return _scan_cache
 
@@ -247,21 +242,26 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
         def _on_readme(rp: str) -> None:
             _open_file_native(rp)
 
+        # Usar el mismo lenguaje para todos los tipos
+        lenguaje_front = proyecto.lenguaje
+        lenguaje_back = proyecto.lenguaje
+        lenguaje_global = proyecto.lenguaje
+        
         rows = [
             _route_row(
-                "DEV",  proyecto.ruta_dev  or "", scan["fechas"]["DEV"],
-                scan["sizes"]["DEV"],  proyecto.desc_dev  or "",
-                proyecto.lenguaje, on_open_ide, on_explorer, _on_readme,
+                "FRONT",  getattr(proyecto, "ruta_front", None) or "", scan["fechas"]["FRONT"],
+                scan["sizes"]["FRONT"], getattr(proyecto, "desc_front", None) or "",
+                lenguaje_front, on_open_ide, on_explorer, _on_readme,
             ),
             _route_row(
-                "TEST", proyecto.ruta_test or "", scan["fechas"]["TEST"],
-                scan["sizes"]["TEST"], proyecto.desc_test or "",
-                proyecto.lenguaje, on_open_ide, on_explorer, _on_readme,
+                "BACK", getattr(proyecto, "ruta_back", None) or "", scan["fechas"]["BACK"],
+                scan["sizes"]["BACK"], getattr(proyecto, "desc_back", None) or "",
+                lenguaje_back, on_open_ide, on_explorer, _on_readme,
             ),
             _route_row(
-                "PRO",  proyecto.ruta_pro  or "", scan["fechas"]["PRO"],
-                scan["sizes"]["PRO"],  proyecto.desc_pro  or "",
-                proyecto.lenguaje, on_open_ide, on_explorer, _on_readme,
+                "GLOBAL", getattr(proyecto, "ruta_global", None) or "", scan["fechas"]["GLOBAL"],
+                scan["sizes"]["GLOBAL"], getattr(proyecto, "desc_global", None) or "",
+                lenguaje_global, on_open_ide, on_explorer, _on_readme,
             ),
         ]
 
@@ -271,12 +271,12 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
             obs_section = [
                 ft.Container(
                     content=ft.Row([
-                        ft.Icon(ft.Icons.NOTES, size=13, color=C_MUTED),
-                        ft.Text(obs, size=11, color=C_MUTED, expand=True,
+                        ft.Icon(ft.Icons.NOTES, size=13, color=colors["C_MUTED"]),
+                        ft.Text(obs, size=11, color=colors["C_MUTED"], expand=True,
                                 no_wrap=False, max_lines=3,
                                 overflow=ft.TextOverflow.ELLIPSIS),
                     ], spacing=6, vertical_alignment=ft.CrossAxisAlignment.START),
-                    bgcolor=C_OBS_BG,
+                    bgcolor=colors["C_OBS_BG"],
                     padding=ft.padding.symmetric(horizontal=12, vertical=6),
                     border_radius=4,
                     margin=ft.margin.symmetric(horizontal=10, vertical=4),
@@ -285,11 +285,26 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
 
         # Barra de acciones
         action_controls = []
-        if proyecto.url_github:
+        # URL de GitHub FRONT
+        if hasattr(proyecto, "url_github_front") and getattr(proyecto, "url_github_front", None):
             action_controls.append(ft.TextButton(
-                text="GitHub", icon=ft.Icons.SOURCE, icon_color="#F05032",
-                tooltip=proyecto.url_github,
-                on_click=lambda e, u=proyecto.url_github: on_open_url(u),
+                text="GitHub FRONT", icon=ft.Icons.SOURCE, icon_color="#F05032",
+                tooltip=proyecto.url_github_front,
+                on_click=lambda e, u=proyecto.url_github_front: on_open_url(u),
+            ))
+        # URL de GitHub BACK
+        if hasattr(proyecto, "url_github_back") and getattr(proyecto, "url_github_back", None):
+            action_controls.append(ft.TextButton(
+                text="GitHub BACK", icon=ft.Icons.SOURCE, icon_color="#F05032",
+                tooltip=proyecto.url_github_back,
+                on_click=lambda e, u=proyecto.url_github_back: on_open_url(u),
+            ))
+        # URL de GitHub GLOBAL
+        if hasattr(proyecto, "url_github_global") and getattr(proyecto, "url_github_global", None):
+            action_controls.append(ft.TextButton(
+                text="GitHub GLOBAL", icon=ft.Icons.SOURCE, icon_color="#F05032",
+                tooltip=proyecto.url_github_global,
+                on_click=lambda e, u=proyecto.url_github_global: on_open_url(u),
             ))
         if proyecto.url_azure:
             action_controls.append(ft.TextButton(
@@ -315,38 +330,38 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
             on_click=lambda e, pid=proyecto.id, nom=proyecto.nombre: on_credentials(pid, nom),
         ))
         action_controls.append(ft.IconButton(
-            icon=ft.Icons.EDIT_OUTLINED, icon_color=C_ACCENT,
+            icon=ft.Icons.EDIT_OUTLINED, icon_color=colors["C_ACCENT"],
             tooltip="Editar", icon_size=18,
             on_click=lambda e, pid=proyecto.id: on_edit(pid),
         ))
         action_controls.append(ft.IconButton(
-            icon=ft.Icons.DELETE_OUTLINE, icon_color=C_ERROR,
+            icon=ft.Icons.DELETE_OUTLINE, icon_color=colors["C_ERROR"],
             tooltip="Eliminar", icon_size=18,
             on_click=lambda e, pid=proyecto.id: on_delete(pid),
         ))
 
         return ft.Column(
             controls=[
-                ft.Divider(height=1, color=C_BORDER, thickness=1),
+                ft.Divider(height=1, color=colors["C_BORDER"], thickness=1),
                 # Subtítulo
                 ft.Container(
                     content=ft.Row([
-                        ft.Text("Lenguaje: ", size=11, color=C_MUTED),
+                        ft.Text("Lenguaje: ", size=11, color=colors["C_MUTED"]),
                         ft.Text(proyecto.lenguaje, size=11, color=lang_color,
                                 weight=ft.FontWeight.W_500),
-                        ft.Text("  |  Repo: ", size=11, color=C_MUTED),
+                        ft.Text("  |  Repo: ", size=11, color=colors["C_MUTED"]),
                         ft.Text(proyecto.tipo_repo, size=11, color=repo_color,
                                 weight=ft.FontWeight.W_500),
-                        ft.Text("  |  Tipo: ", size=11, color=C_MUTED),
+                        ft.Text("  |  Tipo: ", size=11, color=colors["C_MUTED"]),
                         ft.Icon(
                             TIPO_PROYECTO_ICON.get(
                                 getattr(proyecto, "tipo_proyecto", "Empresa"),
-                                (ft.Icons.FOLDER, C_MUTED)
+                                (ft.Icons.FOLDER, colors["C_MUTED"])
                             )[0],
                             size=13,
                             color=TIPO_PROYECTO_ICON.get(
                                 getattr(proyecto, "tipo_proyecto", "Empresa"),
-                                (ft.Icons.FOLDER, C_MUTED)
+                                (ft.Icons.FOLDER, colors["C_MUTED"])
                             )[1],
                         ),
                         ft.Container(width=3),
@@ -355,7 +370,7 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
                             size=11,
                             color=TIPO_PROYECTO_ICON.get(
                                 getattr(proyecto, "tipo_proyecto", "Empresa"),
-                                (ft.Icons.FOLDER, C_MUTED)
+                                (ft.Icons.FOLDER, colors["C_MUTED"])
                             )[1],
                             weight=ft.FontWeight.W_500,
                         ),
@@ -370,7 +385,7 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
                 ft.Container(
                     content=ft.Row(controls=action_controls, spacing=2),
                     padding=ft.padding.symmetric(horizontal=8, vertical=4),
-                    border=ft.border.only(top=ft.border.BorderSide(1, C_BORDER)),
+                    border=ft.border.only(top=ft.border.BorderSide(1, colors["C_BORDER"])),
                 ),
             ],
             spacing=0,
@@ -407,22 +422,22 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
                 ),
                 ft.Text(
                     proyecto.nombre, size=14, weight=ft.FontWeight.BOLD,
-                    color=C_TEXT, expand=True, no_wrap=True,
+                    color=colors["C_TEXT"], expand=True, no_wrap=True,
                     overflow=ft.TextOverflow.ELLIPSIS,
                 ),
-                ft.Text(proyecto.empresa, size=11, color=C_MUTED, italic=True,
+                ft.Text(proyecto.empresa, size=11, color=colors["C_MUTED"], italic=True,
                         no_wrap=True),
                 ft.Container(width=8),
                 # Tipo de proyecto — icono con tooltip
                 ft.Icon(
-                    TIPO_PROYECTO_ICON.get(
+                     TIPO_PROYECTO_ICON.get(
                         getattr(proyecto, "tipo_proyecto", "Empresa"),
-                        (ft.Icons.FOLDER, C_MUTED)
+                        (ft.Icons.FOLDER, colors["C_MUTED"])
                     )[0],
                     size=14,
                     color=TIPO_PROYECTO_ICON.get(
                         getattr(proyecto, "tipo_proyecto", "Empresa"),
-                        (ft.Icons.FOLDER, C_MUTED)
+                        (ft.Icons.FOLDER, colors["C_MUTED"])
                     )[1],
                     tooltip=getattr(proyecto, "tipo_proyecto", "Empresa") or "Empresa",
                 ),
@@ -431,14 +446,14 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
                         tooltip=proyecto.tipo_repo),
                 ft.Container(width=4),
                 ft.Icon(
-                    ft.Icons.EXPAND_MORE, size=18, color=C_MUTED,
+                    ft.Icons.EXPAND_MORE, size=18, color=colors["C_MUTED"],
                     ref=chevron_icon,
                 ),
             ],
             alignment=ft.MainAxisAlignment.START,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         ),
-        bgcolor=C_CARD_HEAD,
+        bgcolor=colors["C_CARD_HEAD"],
         padding=ft.padding.symmetric(horizontal=12, vertical=8),
         border_radius=ft.border_radius.only(top_left=8, top_right=8),
         on_click=toggle,
@@ -451,9 +466,9 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
                 controls=[header, body_container],
                 spacing=0,
             ),
-            bgcolor=C_CARD,
+            bgcolor=colors["C_CARD"],
             border_radius=8,
-            border=ft.border.all(1, C_BORDER),
+            border=ft.border.all(1, colors["C_BORDER"]),
             clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
         ),
         elevation=3,
@@ -464,14 +479,15 @@ def build_project_card(proyecto, on_edit: Callable, on_delete: Callable,
 # ─── Estados vacíos ───────────────────────────────────────────────────────────
 
 def build_empty_state() -> ft.Container:
+    colors = get_theme_colors()
     return ft.Container(
         content=ft.Column(
             controls=[
-                ft.Icon(ft.Icons.FOLDER_OPEN, size=64, color=C_MUTED),
-                ft.Text("No hay proyectos registrados", size=18, color=C_MUTED,
+                ft.Icon(ft.Icons.FOLDER_OPEN, size=64, color=colors["C_MUTED"]),
+                ft.Text("No hay proyectos registrados", size=18, color=colors["C_MUTED"],
                         weight=ft.FontWeight.W_500),
                 ft.Text("Pulsa el botón '+ Nuevo' para añadir tu primer proyecto.",
-                        size=13, color=C_MUTED),
+                        size=13, color=colors["C_MUTED"]),
             ],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=10,
@@ -482,13 +498,14 @@ def build_empty_state() -> ft.Container:
 
 
 def build_no_results_state() -> ft.Container:
+    colors = get_theme_colors()
     return ft.Container(
         content=ft.Column(
             controls=[
-                ft.Icon(ft.Icons.SEARCH_OFF, size=48, color=C_MUTED),
-                ft.Text("Sin resultados", size=16, color=C_MUTED,
+                ft.Icon(ft.Icons.SEARCH_OFF, size=48, color=colors["C_MUTED"]),
+                ft.Text("Sin resultados", size=16, color=colors["C_MUTED"],
                         weight=ft.FontWeight.W_500),
-                ft.Text("Prueba con otro término de búsqueda.", size=12, color=C_MUTED),
+                ft.Text("Prueba con otro término de búsqueda.", size=12, color=colors["C_MUTED"]),
             ],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=8,

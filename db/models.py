@@ -30,6 +30,9 @@ class Proyecto(Base):
         default="Python"
         # Valores posibles: Python, Nuxt, Vue, React, CSharp, Bat, Shell
     )
+    
+    # Propiedades virtuales para lenguajes específicos (sin mapear a columnas)
+    # Nota: Eliminadas las propiedades virtuales para evitar problemas con SQLAlchemy
     tipo_repo = Column(
         String(20),
         nullable=False,
@@ -44,21 +47,23 @@ class Proyecto(Base):
     )
 
     # URLs de repositorios (opcionales)
-    url_github = Column(String(500), nullable=True)
-    url_azure = Column(String(500), nullable=True)
+    url_github_front = Column(String(500), nullable=True)
+    url_github_back = Column(String(500), nullable=True)
+    url_github_global = Column(String(500), nullable=True)
+    url_azure = Column(String(500), nullable=True)  # URL Azure se mantiene a nivel de contenedor
 
-    # Rutas físicas de los entornos (opcionales, pueden no existir)
-    ruta_dev  = Column(String(1000), nullable=True)
-    ruta_test = Column(String(1000), nullable=True)
-    ruta_pro  = Column(String(1000), nullable=True)
+    # Rutas físicas por tipo de proyecto (opcionales, pueden no existir)
+    ruta_front = Column(String(1000), nullable=True)
+    ruta_back = Column(String(1000), nullable=True)
+    ruta_global = Column(String(1000), nullable=True)
 
     # Ruta física de la carpeta de documentación (opcional)
     ruta_docs = Column(String(1000), nullable=True)
 
     # Descripción del propósito de cada ruta
-    desc_dev  = Column(String(500), nullable=True)
-    desc_test = Column(String(500), nullable=True)
-    desc_pro  = Column(String(500), nullable=True)
+    desc_front = Column(String(500), nullable=True)
+    desc_back = Column(String(500), nullable=True)
+    desc_global = Column(String(500), nullable=True)
 
     # Observación general del proyecto
     observacion = Column(String(2000), nullable=True)
@@ -77,17 +82,20 @@ class Proyecto(Base):
             "nombre":      self.nombre,
             "empresa":     self.empresa,
             "lenguaje":    self.lenguaje,
+            # Para compatibilidad con la interfaz
             "tipo_repo":   self.tipo_repo,
-            "url_github":  self.url_github  or "",
+            "url_github_front":  self.url_github_front  or "",
+            "url_github_back":   self.url_github_back   or "",
+            "url_github_global": self.url_github_global or "",
             "url_azure":   self.url_azure   or "",
             "tipo_proyecto": self.tipo_proyecto or "Empresa",
-            "ruta_dev":    self.ruta_dev    or "",
-            "ruta_test":   self.ruta_test   or "",
-            "ruta_pro":    self.ruta_pro    or "",
+            "ruta_front":  self.ruta_front  or "",
+            "ruta_back":   self.ruta_back   or "",
+            "ruta_global": self.ruta_global or "",
             "ruta_docs":   self.ruta_docs   or "",
-            "desc_dev":    self.desc_dev    or "",
-            "desc_test":   self.desc_test   or "",
-            "desc_pro":    self.desc_pro    or "",
+            "desc_front":  self.desc_front  or "",
+            "desc_back":   self.desc_back   or "",
+            "desc_global": self.desc_global or "",
             "observacion": self.observacion or "",
         }
 

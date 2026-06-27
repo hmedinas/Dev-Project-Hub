@@ -85,15 +85,17 @@ def create_project(data: dict) -> Proyecto:
             lenguaje=data.get("lenguaje", "Python"),
             tipo_repo=data.get("tipo_repo", "Git"),
             tipo_proyecto=data.get("tipo_proyecto", "Empresa"),
-            url_github=data.get("url_github") or None,
+            url_github_front=data.get("url_github_front") or None,
+            url_github_back=data.get("url_github_back") or None,
+            url_github_global=data.get("url_github_global") or None,
             url_azure=data.get("url_azure") or None,
-            ruta_dev=data.get("ruta_dev") or None,
-            ruta_test=data.get("ruta_test") or None,
-            ruta_pro=data.get("ruta_pro") or None,
+            ruta_front=data.get("ruta_front") or None,
+            ruta_back=data.get("ruta_back") or None,
+            ruta_global=data.get("ruta_global") or None,
             ruta_docs=data.get("ruta_docs") or None,
-            desc_dev=data.get("desc_dev") or None,
-            desc_test=data.get("desc_test") or None,
-            desc_pro=data.get("desc_pro") or None,
+            desc_front=data.get("desc_front") or None,
+            desc_back=data.get("desc_back") or None,
+            desc_global=data.get("desc_global") or None,
             observacion=data.get("observacion") or None,
         )
         session.add(proyecto)
@@ -123,15 +125,17 @@ def update_project(project_id: int, data: dict) -> Optional[Proyecto]:
         proyecto.lenguaje      = data.get("lenguaje", proyecto.lenguaje)
         proyecto.tipo_repo     = data.get("tipo_repo", proyecto.tipo_repo)
         proyecto.tipo_proyecto = data.get("tipo_proyecto", proyecto.tipo_proyecto)
-        proyecto.url_github    = data.get("url_github") or None
+        proyecto.url_github_front  = data.get("url_github_front") or None
+        proyecto.url_github_back   = data.get("url_github_back") or None
+        proyecto.url_github_global = data.get("url_github_global") or None
         proyecto.url_azure     = data.get("url_azure") or None
-        proyecto.ruta_dev      = data.get("ruta_dev") or None
-        proyecto.ruta_test     = data.get("ruta_test") or None
-        proyecto.ruta_pro      = data.get("ruta_pro") or None
+        proyecto.ruta_front    = data.get("ruta_front") or None
+        proyecto.ruta_back     = data.get("ruta_back") or None
+        proyecto.ruta_global   = data.get("ruta_global") or None
         proyecto.ruta_docs     = data.get("ruta_docs") or None
-        proyecto.desc_dev      = data.get("desc_dev") or None
-        proyecto.desc_test     = data.get("desc_test") or None
-        proyecto.desc_pro      = data.get("desc_pro") or None
+        proyecto.desc_front    = data.get("desc_front") or None
+        proyecto.desc_back     = data.get("desc_back") or None
+        proyecto.desc_global   = data.get("desc_global") or None
         proyecto.observacion   = data.get("observacion") or None
 
         session.commit()
